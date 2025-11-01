@@ -19,14 +19,20 @@ Une plateforme interactive pour la préparation aux certifications IT avec suppo
 
 ## 🚀 Démarrage Rapide
 
+git clone https://
+
+cd quiz-app-v2
+
+
+### Configurer les variables d'environnement
+```bash
+cp frontend/frontend.env.example frontend/.env
+cp backend/backend.env.example backend/.env
+```
+
 ### Avec Docker Compose
 
 ```bash
-# 1. Configurer les variables d'environnement
-cp .env.example .env
-cp frontend/.env.example frontend/.env
-cp backend/.env.example backend/.env
-
 # 2. Démarrer les services
 docker compose up -d
 
