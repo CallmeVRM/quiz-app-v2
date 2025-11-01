@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v3.1
+    container_name: traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - quiz-network
+    restart: unless-stopped
+
+  quiz-backend:
+    image: callmevrm/quiz-backend:v2
+    container_name: quiz-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://edulabs:MotdepassePGbg2025@quiz-db:5432/edulabs_quiz
+      - ALLOWED_ORIGINS=*
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode); process.exit(0);}).on('error', () => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - quiz-network
+
+  quiz-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: callmevrm/quiz-frontend:v2
+    container_name: quiz-frontend
+    ports:
+      - "5173:5173"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=5173"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5173', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode); process.exit(0);}).on('error', () => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - quiz-network
+
+  quiz-db:
+    image: postgres:17
+    container_name: quiz-db
+    environment:
+      - POSTGRES_USER=edulabs
+      - POSTGRES_PASSWORD=MotdepassePGbg2025
+      - POSTGRES_DB=edulabs_quiz
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - quiz-network
+
+volumes:
+  pgdata:
+
+networks:
+  quiz-network:
+    driver: bridge

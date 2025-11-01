@@ -1,0 +1,41 @@
+entryPoints:
+  web:
+    address: ":80"
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+
+http:
+  routers:
+    frontend:
+      rule: "PathPrefix(`/`)"
+      service: frontend
+      priority: 1
+    backend:
+      rule: "PathPrefix(`/api`)"
+      service: backend
+      middlewares:
+        - backend-stripprefix
+      priority: 10
+
+  services:
+    frontend:
+      loadBalancer:
+        servers:
+          - url: "http://quiz-frontend:5173"
+    backend:
+      loadBalancer:
+        servers:
+          - url: "http://quiz-backend:3000"
+
+  middlewares:
+    backend-stripprefix:
+      stripPrefix:
+        prefixes:
+          - "/api"
+
+api:
+  dashboard: true
+  insecure: true
