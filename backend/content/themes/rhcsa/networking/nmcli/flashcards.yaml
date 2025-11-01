@@ -1,0 +1,22 @@
+- id: fc1
+  concept: Création IPv4 statique
+  command:
+    title: nmcli add
+    code: nmcli con add type ethernet ifname eth0 ip4 192.168.1.10/24 gw4 192.168.1.1
+- id: fc2
+  concept: Up/Down
+  command:
+    title: Activer / désactiver
+    code: |
+      nmcli con up <name>
+      nmcli con down <name>
+- id: fc3
+  concept: DNS
+  command:
+    title: Définir DNS multiples
+    code: nmcli con mod <name> ipv4.dns "1.1.1.1 8.8.8.8"
+- id: fc4
+  concept: Inspection
+  command:
+    title: État rapide
+    code: nmcli dev status

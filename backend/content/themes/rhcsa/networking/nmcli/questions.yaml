@@ -1,0 +1,28 @@
+- id: q1
+  prompt: Lister les connexions NetworkManager ?
+  options: [ "nmcli con show", "ip a", "nmcli dev wifi", "systemctl status NetworkManager" ]
+  correctIndex: 0
+- id: q2
+  prompt: Créer une connexion statique eth0 (adresse 192.168.1.10/24, gw 192.168.1.1) ?
+  options:
+    - nmcli con add type ethernet ifname eth0 ip4 192.168.1.10/24 gw4 192.168.1.1
+    - nmcli dev set eth0 192.168.1.10/24 gw 192.168.1.1
+    - ip addr add 192.168.1.10/24 dev eth0 && ip route add default via 192.168.1.1
+    - nmtui add eth0 192.168.1.10
+  correctIndex: 0
+- id: q3
+  prompt: Activer une connexion nommée 'static-eth0' ?
+  options: [ "nmcli con up static-eth0", "nmcli dev up eth0", "ip link set eth0 up", "systemctl start static-eth0" ]
+  correctIndex: 0
+- id: q4
+  prompt: Modifer DNS de la connexion 'static-eth0' ?
+  options: [ "nmcli con mod static-eth0 ipv4.dns '1.1.1.1 8.8.8.8'", "resolvectl set-dns eth0 1.1.1.1 8.8.8.8", "echo 'nameserver 1.1.1.1' >/etc/resolv.conf", "nmcli dns add ..." ]
+  correctIndex: 0
+- id: q5
+  prompt: Déterminer l’état des devices ?
+  options: [ "nmcli dev status", "nmcli con status", "ip link status", "systemctl nm status" ]
+  correctIndex: 0
+- id: q6
+  prompt: Supprimer la connexion 'static-eth0' ?
+  options: [ "nmcli con del static-eth0", "nmcli dev del eth0", "ip link del eth0", "nmcli con rm dev eth0" ]
+  correctIndex: 0

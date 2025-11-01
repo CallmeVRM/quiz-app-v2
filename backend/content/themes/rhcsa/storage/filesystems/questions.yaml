@@ -1,0 +1,35 @@
+- id: fs-q1
+  type: order
+  prompt: "Rangez les étapes pour créer et monter une partition XFS de 10GB sur /dev/sdb"
+  items:
+    - "fdisk /dev/sdb (créer partition n, p, 1, +10G, w)"
+    - "mkfs.xfs /dev/sdb1"
+    - "mkdir /mnt/data"
+    - "mount /dev/sdb1 /mnt/data"
+    - "Ajouter dans /etc/fstab pour montage permanent"
+  correctOrder: [0, 1, 2, 3, 4]
+  explanation: "Ordre : Créer partition (fdisk) → Formater XFS → Créer point de montage → Monter → /etc/fstab pour persistance. Sans fstab, le montage disparaît au reboot."
+
+- id: fs-q2
+  type: multiple
+  prompt: "Quelles options de montage sont pertinentes pour la sécurité dans /etc/fstab ?"
+  options:
+    - "noexec - Interdit l'exécution de binaires"
+    - "nosuid - Ignore les bits SUID/SGID"
+    - "nodev - Ignore les fichiers device"
+    - "ro - Montage en lecture seule"
+    - "async - Écritures asynchrones (performance)"
+  correctIndices: [0, 1, 2, 3]
+  explanation: "Sécurité : noexec (pas d'exécution), nosuid (pas de privilege escalation), nodev (pas de device files), ro (lecture seule). async est pour la performance, pas la sécurité. Utilisez noexec,nosuid,nodev sur /tmp par exemple."
+
+- id: fs-q3
+  type: single
+  prompt: "Quelle commande répare un filesystem EXT4 corrompu sur /dev/sdc1 (doit être démonté) ?"
+  options:
+    - "fsck.ext4 /dev/sdc1 ou e2fsck -f /dev/sdc1"
+    - "xfs_repair /dev/sdc1"
+    - "mkfs.ext4 /dev/sdc1"
+    - "mount -o remount,rw /dev/sdc1"
+  correctIndex: 0
+  explanation: "fsck.ext4 ou e2fsck pour EXT4 (-f force check, -y répond yes automatiquement). xfs_repair pour XFS. mkfs DÉTRUIT les données (reformate). Le filesystem doit être démonté pour fsck (ou monté ro)."
+

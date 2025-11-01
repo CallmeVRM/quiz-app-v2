@@ -1,0 +1,38 @@
+- id: fc1
+  concept: Étapes LVM
+  command:
+    title: Créer PV→VG→LV
+    code: |
+      pvcreate /dev/sdb
+      vgcreate vg0 /dev/sdb
+      lvcreate -n data -L 10G vg0
+  examples:
+    - title: Lister
+      code: lvs; vgs; pvs
+  explanation: Chaînage PV→VG→LV.
+- id: fc2
+  concept: Étendre un LV
+  command:
+    title: Étendre + FS
+    code: lvextend -r -L +5G vg0/data
+  examples:
+    - title: XFS hors-ligne ?
+      code: "XFS: extension en ligne OK; réduction non supportée."
+- id: fc3
+  concept: Réduction d’un LV ext4
+  command:
+    title: Sauvegarde + umount + fsck + resize2fs + lvreduce
+    code: |
+      umount /mnt/data
+      fsck -f /dev/vg0/data
+      resize2fs /dev/vg0/data 8G
+      lvreduce -L 8G /dev/vg0/data
+      mount /mnt/data
+- id: fc4
+  concept: Snapshots
+  command:
+    title: Snapshot lecture seule
+    code: lvcreate -L 1G -s -n data_snap /dev/vg0/data
+  examples:
+    - title: Fusion
+      code: lvconvert --merge vg0/data_snap

@@ -1,0 +1,34 @@
+- id: user-q1
+  type: order
+  prompt: "Rangez les étapes pour créer un utilisateur 'webadmin' avec sudo complet et shell bash"
+  items:
+    - "useradd -m -s /bin/bash webadmin"
+    - "passwd webadmin"
+    - "usermod -aG wheel webadmin"
+    - "Vérifier avec 'id webadmin' et 'su - webadmin'"
+  correctOrder: [0, 1, 2, 3]
+  explanation: "Ordre : useradd avec home (-m) et shell → passwd → ajout au groupe wheel (sudo RHEL) → vérification. Sur Ubuntu c'est 'sudo' group au lieu de 'wheel'."
+
+- id: user-q2
+  type: multiple
+  prompt: "Quelles commandes permettent de verrouiller un compte utilisateur temporairement ?"
+  options:
+    - "usermod -L username"
+    - "passwd -l username"
+    - "chage -E 0 username"
+    - "userdel username"
+    - "passwd -u username (pour déverrouiller)"
+  correctIndices: [0, 1, 4]
+  explanation: "Lock : usermod -L ou passwd -l (ajoute ! au hash). Unlock : usermod -U ou passwd -u. chage -E 0 expire le compte (différent). userdel SUPPRIME l'utilisateur."
+
+- id: user-q3
+  type: single
+  prompt: "Vous devez configurer un utilisateur avec expiration de mot de passe tous les 60 jours et avertissement 7 jours avant. Quelle commande ?"
+  options:
+    - "chage -M 60 -W 7 username"
+    - "passwd -e 60 -w 7 username"
+    - "usermod --maxdays 60 --warning 7 username"
+    - "Modifier /etc/shadow manuellement"
+  correctIndex: 0
+  explanation: "chage (change age) gère l'expiration des mots de passe : -M (max days), -W (warning days), -I (inactive), -E (expiration date). passwd -e force l'expiration immédiate. usermod ne gère pas les passwords."
+

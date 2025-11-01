@@ -1,0 +1,34 @@
+- id: blob-q1
+  type: single
+  prompt: "Vous devez stocker des logs d'application rarement consultés (< 1 fois/an) avec coût minimal. Quel tier Blob choisir ?"
+  options:
+    - "Hot tier - Accès fréquent"
+    - "Cool tier - Accès peu fréquent (30 jours min)"
+    - "Archive tier - Accès très rare (180 jours min)"
+    - "Premium Block Blobs - Performance maximale"
+  correctIndex: 2
+  explanation: "Archive tier offre le coût de stockage le plus bas (environ 0.00099$/GB/mois) mais nécessite une réhydratation (plusieurs heures) avant lecture. Parfait pour les logs d'audit légaux."
+
+- id: blob-q2
+  type: multiple
+  prompt: "Quelles fonctionnalités nécessitent un compte StorageV2 (General Purpose v2) ?"
+  options:
+    - "Blob tiering (Hot/Cool/Archive)"
+    - "Soft delete pour blobs"
+    - "Lifecycle management policies"
+    - "Static website hosting"
+    - "Geo-redundant storage (GRS)"
+  correctIndices: [0, 2, 3]
+  explanation: "StorageV2 requis pour: Blob tiering automatique, Lifecycle policies, Static websites."
+
+- id: blob-q3
+  type: order
+  prompt: "Rangez les étapes pour configurer un lifecycle management policy qui déplace les blobs vers Archive après 90 jours"
+  items:
+    - "Créer un Storage Account StorageV2"
+    - "Naviguer vers Lifecycle Management dans le portail"
+    - "Créer une règle avec condition 'daysAfterModificationGreaterThan: 90'"
+    - "Définir l'action 'tierToArchive'"
+    - "Sauvegarder et appliquer la policy"
+  correctOrder: [0, 1, 2, 3, 4]
+  explanation: "Ordre : Compte StorageV2 → Lifecycle Management → Définir condition (90 jours sans modification) → Action tierToArchive → Appliquer."

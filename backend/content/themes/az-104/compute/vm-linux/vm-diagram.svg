@@ -1,0 +1,9 @@
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#e3f2fd"/>
+  <rect x="50" y="50" width="300" height="200" fill="#fff" stroke="#1976d2" stroke-width="2"/>
+  <text x="200" y="90" text-anchor="middle" font-size="24" font-weight="bold" fill="#1976d2">Azure VM D-series</text>
+  <text x="80" y="130" font-size="16" fill="#333">✓ CPU: Balanced compute</text>
+  <text x="80" y="160" font-size="16" fill="#333">✓ Memory: Moderate (3.5-4 GB/vCPU)</text>
+  <text x="80" y="190" font-size="16" fill="#333">✓ Storage: Temp disk included</text>
+  <text x="80" y="220" font-size="16" fill="#333">✓ Use case: General purpose workloads</text>
+</svg>

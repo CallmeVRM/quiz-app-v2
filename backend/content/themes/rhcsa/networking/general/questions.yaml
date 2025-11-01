@@ -1,0 +1,34 @@
+- id: netgen-q1
+  type: single
+  prompt: "Quelle commande affiche la table de routage actuelle ?"
+  options:
+    - "route -n ou ip route show"
+    - "nmcli routing list"
+    - "cat /etc/routes"
+    - "netstat -s"
+  correctIndex: 0
+  explanation: "Table de routage : 'route -n' (obsolète) ou 'ip route show' (moderne). netstat -s = statistiques réseau. nmcli routing n'existe pas. /etc/routes n'existe pas."
+
+- id: netgen-q2
+  type: multiple
+  prompt: "Quels fichiers contiennent la configuration du hostname ?"
+  options:
+    - "/etc/hostname (hostname permanent)"
+    - "/proc/sys/kernel/hostname (runtime)"
+    - "/etc/hosts (résolution locale)"
+    - "/etc/sysconfig/network (RHEL 6, obsolète RHEL 7+)"
+    - "/var/log/hostname.log"
+  correctIndices: [0, 1, 2]
+  explanation: "/etc/hostname = permanent (hostnamectl set-hostname). /proc/sys/kernel/hostname = runtime (hostname <name>). /etc/hosts = mapping IP→nom. /etc/sysconfig/network obsolète sur RHEL 7+."
+
+- id: netgen-q3
+  type: order
+  prompt: "Rangez les étapes pour changer définitivement le hostname en 'prod-web-01'"
+  items:
+    - "hostnamectl set-hostname prod-web-01"
+    - "Vérifier avec 'hostnamectl status'"
+    - "Redémarrer pour appliquer partout (optionnel)"
+    - "Mettre à jour /etc/hosts avec nouvelle entrée"
+  correctOrder: [0, 1, 3, 2]
+  explanation: "Ordre : hostnamectl set-hostname → vérifier → MAJ /etc/hosts (mapping 127.0.1.1 vers nouveau nom) → redémarrer (optionnel, certains services lisent au démarrage). hostnamectl modifie automatiquement /etc/hostname."
+

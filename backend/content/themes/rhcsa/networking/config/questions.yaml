@@ -1,0 +1,35 @@
+- id: netconfig-q1
+  type: order
+  prompt: "Rangez les étapes pour configurer une IP statique 192.168.1.100/24 sur eth0 avec nmcli"
+  items:
+    - "nmcli con show (identifier la connexion)"
+    - "nmcli con mod <conn_name> ipv4.addresses 192.168.1.100/24"
+    - "nmcli con mod <conn_name> ipv4.method manual"
+    - "nmcli con mod <conn_name> ipv4.gateway 192.168.1.1"
+    - "nmcli con up <conn_name>"
+  correctOrder: [0, 2, 1, 3, 4]
+  explanation: "Ordre : Identifier connexion → Passer en manual (désactive DHCP) → Définir IP/subnet → Gateway → Activer. Le 'method manual' DOIT être avant 'addresses' sinon conflit."
+
+- id: netconfig-q2
+  type: multiple
+  prompt: "Quelles commandes vérifient la configuration réseau active ?"
+  options:
+    - "ip addr show ou ip a"
+    - "nmcli device status"
+    - "ifconfig (obsolète mais fonctionnel)"
+    - "cat /etc/sysconfig/network-scripts/ifcfg-*"
+    - "netstat -i"
+  correctIndices: [0, 1, 2, 4]
+  explanation: "Config active : ip addr, nmcli device, ifconfig, netstat -i. Les fichiers /etc/sysconfig/network-scripts montrent la config PERSISTANTE, pas l'état runtime actuel."
+
+- id: netconfig-q3
+  type: single
+  prompt: "Une VM ne résout plus les noms DNS. Où vérifier en premier ?"
+  options:
+    - "/etc/hosts uniquement"
+    - "/etc/resolv.conf (nameservers)"
+    - "/etc/hostname"
+    - "nmcli con show (DNS settings)"
+  correctIndex: 1
+  explanation: "/etc/resolv.conf contient les serveurs DNS (nameserver x.x.x.x). Géré par NetworkManager (nmcli con mod <conn> ipv4.dns 'x.x.x.x'). /etc/hosts = résolution locale statique. /etc/hostname = nom de la machine."
+

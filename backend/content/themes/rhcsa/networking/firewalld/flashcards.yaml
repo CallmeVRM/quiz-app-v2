@@ -1,0 +1,62 @@
+- id: fc1
+  concept: Ajouter un service permanent au firewall
+  command:
+    title: Ajouter SSH de façon permanente
+    code: |
+      firewall-cmd --permanent --add-service=ssh
+      firewall-cmd --reload
+
+- id: fc2
+  concept: Ouvrir un port TCP spécifique dans une zone
+  command:
+    title: Ouvrir le port 8080/tcp dans la zone public
+    code: |
+      firewall-cmd --permanent --zone=public --add-port=8080/tcp
+      firewall-cmd --reload
+
+- id: fc3
+  concept: Vérifier les zones firewall actives
+  command:
+    title: Afficher toutes les zones actives avec leurs interfaces
+    code: |
+      firewall-cmd --get-active-zones
+
+- id: fc4
+  concept: Lister les services autorisés actuellement
+  command:
+    title: Afficher les services dans la configuration runtime
+    code: |
+      firewall-cmd --list-services
+
+- id: fc5
+  concept: Bloquer un port spécifique de façon permanente
+  command:
+    title: Supprimer le port 3306/tcp (MySQL) de la zone public
+    code: |
+      firewall-cmd --permanent --zone=public --remove-port=3306/tcp
+      firewall-cmd --reload
+
+- id: fc6
+  concept: Créer une règle rich-rule pour limiter l'accès SSH
+  command:
+    title: Autoriser SSH uniquement depuis le réseau 192.168.1.0/24
+    code: |
+      firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="192.168.1.0/24" service name="ssh" accept'
+      firewall-cmd --reload
+
+- id: fc7
+  concept: Changer la zone par défaut du firewall
+  command:
+    title: Définir la zone 'dmz' comme zone par défaut
+    code: |
+      firewall-cmd --set-default-zone=dmz
+      firewall-cmd --get-default-zone
+
+- id: fc8
+  concept: Masquerade (NAT) pour partager la connexion internet
+  command:
+    title: Activer le masquerading dans la zone public
+    code: |
+      firewall-cmd --permanent --zone=public --add-masquerade
+      firewall-cmd --reload
+      firewall-cmd --zone=public --query-masquerade

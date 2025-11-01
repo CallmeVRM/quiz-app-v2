@@ -1,0 +1,30 @@
+- id: q1
+  prompt: Quelle commande initialise un disque /dev/sdb pour LVM ?
+  options: [ "fdisk /dev/sdb", "pvcreate /dev/sdb", "lvcreate /dev/sdb", "vgcreate /dev/sdb" ]
+  correctIndex: 1
+  explanation: pvcreate prépare le device comme Physical Volume.
+- id: q2
+  prompt: Quelle commande crée un Volume Group nommé vg0 avec /dev/sdb ?
+  options: [ "vgcreate vg0 /dev/sdb", "vgadd vg0 /dev/sdb", "lvcreate vg0 /dev/sdb", "vgmk vg0 /dev/sdb" ]
+  correctIndex: 0
+  explanation: vgcreate <vg> <PV...>.
+- id: q3
+  prompt: Créer un Logical Volume de 10G nommé data dans vg0 ?
+  options: [ "lvcreate -L 10G -n data vg0", "lvadd -n data -s 10G vg0", "mkfs -L data vg0 10G", "vgextend vg0 -L 10G data" ]
+  correctIndex: 0
+  explanation: lvcreate -L ... -n <lv> <vg>.
+- id: q4
+  prompt: Étendre le LV data de +5G avec redimensionnement du FS ?
+  options: [ "lvextend -r -L +5G vg0/data", "lvresize -L 5G vg0/data", "vgextend vg0 +5G", "resize2fs vg0/data +5G (seul)" ]
+  correctIndex: 0
+  explanation: -r étend le FS en ligne si supporté.
+- id: q5
+  prompt: Quelle commande liste les LV existants avec détails ?
+  options: [ "lvs", "pvs", "vgs", "lvdisplay -a" ]
+  correctIndex: 0
+  explanation: lvs est le résumé; lvdisplay donne plus verbeux.
+- id: q6
+  prompt: Supprimer proprement un LV ?
+  options: [ "lvremove vg0/data", "vgremove vg0/data", "pvremove vg0/data", "rm -rf /dev/vg0/data" ]
+  correctIndex: 0
+  explanation: lvremove cible le LV.

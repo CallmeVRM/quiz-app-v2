@@ -1,0 +1,20 @@
+- id: fc1
+  concept: SMB vs NFS
+  command:
+    title: Choix
+    code: SMB (Windows/ACLs), NFS (Linux/perf) selon workload.
+- id: fc2
+  concept: Premium Files
+  command:
+    title: SKU
+    code: Compte "FileStorage", perf en provisioned size.
+- id: fc3
+  concept: Sécurité
+  command:
+    title: Endpoints
+    code: Private Endpoint + firewall rules par IP.
+- id: fc4
+  concept: Backup
+  command:
+    title: Azure Backup
+    code: Politiques planifiées, snapshots, restauration granulaire.

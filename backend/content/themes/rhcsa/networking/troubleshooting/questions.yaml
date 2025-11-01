@@ -1,0 +1,35 @@
+- id: nettrouble-q1
+  type: order
+  prompt: "Rangez les étapes de diagnostic quand une VM ne peut pas pinguer Internet"
+  items:
+    - "Vérifier l'interface réseau : ip link show"
+    - "Vérifier l'IP et le routage : ip addr && ip route"
+    - "Tester la gateway : ping <gateway_ip>"
+    - "Tester DNS : ping 8.8.8.8 puis ping google.com"
+    - "Vérifier firewall : firewall-cmd --list-all"
+  correctOrder: [0, 1, 2, 3, 4]
+  explanation: "Diagnostic réseau systématique : Interface UP ? → IP configurée + route ? → Gateway joignable ? → Internet joignable (IP) ? → DNS fonctionne ? → Firewall bloque ?"
+
+- id: nettrouble-q2
+  type: multiple
+  prompt: "Quelles commandes permettent de voir les connexions TCP actives ?"
+  options:
+    - "ss -tuln (modern replacement)"
+    - "netstat -tuln (obsolète mais fonctionnel)"
+    - "lsof -i TCP"
+    - "tcpdump -i eth0 tcp"
+    - "systemctl status network"
+  correctIndices: [0, 1, 2]
+  explanation: "Connexions TCP : ss -tuln (modern), netstat -tuln (obsolète), lsof -i TCP. tcpdump CAPTURE le trafic mais n'affiche pas les connexions établies. systemctl status = état du service."
+
+- id: nettrouble-q3
+  type: single
+  prompt: "Un service web écoute sur le port 8080 mais n'est pas accessible depuis l'extérieur. Quelle commande vérifie si le port est bien en écoute ?"
+  options:
+    - "ss -tuln | grep 8080 ou netstat -tuln | grep 8080"
+    - "curl localhost:8080"
+    - "telnet external_ip 8080"
+    - "firewall-cmd --list-ports"
+  correctIndex: 0
+  explanation: "ss -tuln ou netstat -tuln montre les ports en LISTEN. Rechercher '0.0.0.0:8080' (toutes IPs) ou '127.0.0.1:8080' (localhost only). curl teste l'accès, pas l'écoute. telnet depuis l'extérieur teste la connectivité complète (réseau + firewall)."
+

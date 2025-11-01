@@ -1,0 +1,35 @@
+- id: lvm-q1
+  type: order
+  prompt: "Rangez les étapes pour créer un Logical Volume 'data_lv' de 5GB dans un nouveau VG 'datavg'"
+  items:
+    - "pvcreate /dev/sdb /dev/sdc (créer Physical Volumes)"
+    - "vgcreate datavg /dev/sdb /dev/sdc"
+    - "lvcreate -L 5G -n data_lv datavg"
+    - "mkfs.xfs /dev/datavg/data_lv"
+    - "mount /dev/datavg/data_lv /mnt/data"
+  correctOrder: [0, 1, 2, 3, 4]
+  explanation: "Hiérarchie LVM : Physical Volumes (pvcreate) → Volume Group (vgcreate) → Logical Volume (lvcreate) → Format → Mount. Les PV fournissent l'espace physique au VG."
+
+- id: lvm-q2
+  type: multiple
+  prompt: "Quelles commandes permettent d'étendre un Logical Volume et son filesystem ?"
+  options:
+    - "lvextend -L +2G /dev/vg/lv (étendre le LV)"
+    - "resize2fs /dev/vg/lv (étendre EXT4)"
+    - "xfs_growfs /mnt/mountpoint (étendre XFS monté)"
+    - "vgextend vg /dev/sdd (ajouter disque au VG)"
+    - "pvresize /dev/sdb (étendre PV après resize disque)"
+  correctIndices: [0, 1, 2, 3, 4]
+  explanation: "Extension LVM : lvextend (LV) → resize2fs (EXT4) ou xfs_growfs (XFS). Si VG plein, vgextend ajoute un PV. Si disque étendu (VM), pvresize met à jour le PV. XFS se resize À CHAUD (monté), EXT4 aussi avec resize2fs online."
+
+- id: lvm-q3
+  type: single
+  prompt: "Un Logical Volume est plein. Quelle commande affiche l'espace disponible dans le Volume Group ?"
+  options:
+    - "vgdisplay ou vgs (VG Free PE / Size)"
+    - "lvdisplay ou lvs"
+    - "pvdisplay ou pvs"
+    - "df -h"
+  correctIndex: 0
+  explanation: "vgdisplay ou vgs montre 'VG Size' et 'Free PE/Size' du Volume Group. lvdisplay = info sur LV. pvdisplay = info sur PV. df -h = espace filesystem (pas LVM layer). Si VG Free > 0, on peut étendre le LV."
+

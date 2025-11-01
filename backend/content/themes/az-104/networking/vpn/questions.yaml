@@ -1,0 +1,35 @@
+- id: vpn-q1
+  type: single
+  prompt: "Vous devez connecter 5 bureaux régionaux à Azure avec haute disponibilité. Quelle solution VPN Gateway recommandez-vous ?"
+  options:
+    - "Basic SKU avec une seule instance"
+    - "VpnGw1 en mode Active-Standby"
+    - "VpnGw1AZ en mode Active-Active avec zone redundancy"
+    - "VpnGw2 Standard sans redondance"
+  correctIndex: 2
+  explanation: "Pour 5 sites avec HA, utilisez VpnGw1AZ+ en mode Active-Active avec zone redundancy. Le SKU AZ garantit 99.99% SLA vs 99.95% pour les SKU non-AZ. Active-Active double les tunnels disponibles."
+
+- id: vpn-q2
+  type: multiple
+  prompt: "Quelles affirmations sont vraies concernant Point-to-Site (P2S) VPN dans Azure ?"
+  options:
+    - "Supporte les protocoles SSTP, OpenVPN et IKEv2"
+    - "Nécessite un VPN Gateway dédié (pas de cohabitation S2S)"
+    - "Peut utiliser l'authentification Azure AD pour OpenVPN"
+    - "Limite de 128 connexions simultanées sur Basic SKU"
+    - "Compatible avec Windows, Linux, macOS et mobile"
+  correctIndices: [0, 2, 4]
+  explanation: "P2S supporte SSTP (Windows only), OpenVPN (multi-OS) et IKEv2 (iOS/macOS). L'auth Azure AD fonctionne avec OpenVPN. P2S et S2S PEUVENT cohabiter sur le même gateway. Basic SKU = 10 tunnels P2S max, VpnGw1 = 128, VpnGw2/3 = 250+."
+
+- id: vpn-q3
+  type: order
+  prompt: "Rangez les étapes pour configurer un Site-to-Site VPN entre Azure et un datacenter on-premises"
+  items:
+    - "Créer un Virtual Network avec Gateway Subnet (/27 minimum)"
+    - "Déployer un VPN Gateway (attention : 30-45 min)"
+    - "Créer un Local Network Gateway (représente le site on-prem)"
+    - "Configurer l'équipement VPN on-premises avec la clé partagée"
+    - "Créer la connexion VPN et vérifier le statut"
+  correctOrder: [0, 1, 2, 4, 3]
+  explanation: "Ordre : VNet + GatewaySubnet → Déployer VPN Gateway (long !) → Créer Local Network Gateway → Créer connexion Azure → Configurer device on-prem avec clé. La config on-prem est la dernière car vous avez besoin de l'IP publique du gateway Azure."
+

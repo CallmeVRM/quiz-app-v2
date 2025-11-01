@@ -1,0 +1,35 @@
+- id: vnet-q1
+  type: single
+  prompt: "Quelle est la plage d'adresses IP MAXIMALE que vous pouvez attribuer à un Virtual Network Azure ?"
+  options:
+    - "/8 (16,777,216 adresses)"
+    - "/16 (65,536 adresses)"
+    - "/24 (256 adresses)"
+    - "/12 (1,048,576 adresses)"
+  correctIndex: 0
+  explanation: "Azure supporte des VNet de taille /8 (préfixe le plus court) jusqu'à /29 (8 adresses, mais 5 réservées). La plage /8 offre 16M+ d'adresses, utile pour les grandes entreprises avec interconnexions complexes."
+
+- id: vnet-q2
+  type: multiple
+  prompt: "Quelles sont les adresses IP réservées dans chaque subnet Azure ?"
+  options:
+    - "La première adresse (.0) - Identifiant réseau"
+    - "La deuxième adresse (.1) - Passerelle Azure par défaut"
+    - "La troisième et quatrième (.2 et .3) - Services DNS Azure"
+    - "La dernière adresse (.255) - Broadcast réseau"
+    - "Les 5 premières adresses sont réservées"
+  correctIndices: [0, 1, 2, 3]
+  explanation: "Azure réserve 5 adresses par subnet : x.x.x.0 (réseau), x.x.x.1 (passerelle), x.x.x.2 et x.x.x.3 (DNS Azure), x.x.x.255 (broadcast). Donc un /29 (8 IPs) ne laisse que 3 IPs utilisables."
+
+- id: vnet-q3
+  type: order
+  prompt: "Rangez les étapes pour créer un VNet peering entre deux VNets dans des régions différentes"
+  items:
+    - "Vérifier que les plages d'adresses ne se chevauchent pas"
+    - "Créer le peering depuis VNet1 vers VNet2"
+    - "Créer le peering depuis VNet2 vers VNet1"
+    - "Activer 'Allow Gateway Transit' si nécessaire"
+    - "Tester la connectivité entre les ressources"
+  correctOrder: [0, 1, 2, 3, 4]
+  explanation: "Ordre : Vérifier non-chevauchement → Créer peering bidirectionnel (VNet1→VNet2 ET VNet2→VNet1) → Configurer gateway transit si VPN/ExpressRoute → Tester connectivité."
+

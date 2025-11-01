@@ -1,0 +1,26 @@
+- id: q1
+  prompt: Formater /dev/vdb1 en XFS ?
+  options: [ "mkfs.xfs /dev/vdb1", "mkfs.ext4 /dev/vdb1 -t xfs", "mkfs /dev/vdb1 xfs", "mkfs.xfs /mnt/vdb1" ]
+  correctIndex: 0
+  explanation: mkfs.xfs <device>.
+- id: q2
+  prompt: Ajouter un montage persistant de /dev/vdb1 sur /data (xfs) ?
+  options: [ "Entrée /etc/fstab", "mount --permanent ...", "systemctl enable mount@data", "echo auto > /sys/mounts" ]
+  correctIndex: 0
+  explanation: /etc/fstab est la référence.
+- id: q3
+  prompt: Vérifier l’espace disque ?
+  options: [ "df -h", "du -sh /*", "lsblk -f", "blkid" ]
+  correctIndex: 0
+- id: q4
+  prompt: Créer un FS ext4 avec label DATA ?
+  options: [ "mkfs.ext4 -L DATA /dev/vdb2", "mkfs -t ext4 /dev/vdb2 -n DATA", "tune2fs -L DATA /dev/vdb2 (sans mkfs)", "e2label /dev/vdb2 DATA (sans mkfs)" ]
+  correctIndex: 0
+- id: q5
+  prompt: Remonter tous les FS de fstab ?
+  options: [ "mount -a", "systemctl restart mounts", "remount -a", "mount --fstab" ]
+  correctIndex: 0
+- id: q6
+  prompt: Commande pour quotas utilisateurs (XFS project quotas) ?
+  options: [ "xfs_quota", "edquota", "quotaon -xfs", "setquota --xfs" ]
+  correctIndex: 0

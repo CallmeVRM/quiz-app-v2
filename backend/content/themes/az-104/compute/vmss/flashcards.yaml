@@ -1,0 +1,20 @@
+- id: fc1
+  concept: VMSS Flexible
+  command:
+    title: Pourquoi
+    code: Hétérogénéité AZ/zonale, intégration LB/AG, gestion identités.
+- id: fc2
+  concept: Scale out/in
+  command:
+    title: CLI
+    code: az vmss scale -g rg -n vmss --new-capacity 5
+- id: fc3
+  concept: Source d’image
+  command:
+    title: SIG
+    code: Shared Image Gallery (versionnement, régions, réplication)
+- id: fc4
+  concept: Rolling upgrade
+  command:
+    title: Principe
+    code: Batchs, health probes, maxSurge, pause between batches.

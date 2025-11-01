@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 350">
+  <rect width="400" height="350" fill="#f0f0f0"/>
+  <text x="200" y="30" text-anchor="middle" font-size="18" font-weight="bold">Architecture 2: App Gateway + WAF</text>
+  
+  <!-- Internet -->
+  <ellipse cx="200" cy="70" rx="60" ry="35" fill="#87CEEB" stroke="#333" stroke-width="2"/>
+  <text x="200" y="75" text-anchor="middle" font-size="14">Internet</text>
+  
+  <!-- Arrow -->
+  <line x1="200" y1="105" x2="200" y2="140" stroke="#333" stroke-width="2" marker-end="url(#arrow2)"/>
+  
+  <!-- Application Gateway with WAF -->
+  <rect x="120" y="145" width="160" height="70" fill="#2ECC71" stroke="#333" stroke-width="2" rx="5"/>
+  <text x="200" y="170" text-anchor="middle" font-size="14" font-weight="bold">Application Gateway</text>
+  <text x="200" y="190" text-anchor="middle" font-size="12">+ WAF Protection</text>
+  <text x="200" y="205" text-anchor="middle" font-size="10" fill="#006400">✓ Sécurité renforcée</text>
+  
+  <!-- Arrow -->
+  <line x1="200" y1="215" x2="200" y2="250" stroke="#333" stroke-width="2" marker-end="url(#arrow2)"/>
+  
+  <!-- VNet border -->
+  <rect x="80" y="260" width="240" height="70" fill="none" stroke="#666" stroke-width="2" stroke-dasharray="5,5" rx="5"/>
+  <text x="90" y="275" font-size="10" fill="#666">Virtual Network</text>
+  
+  <!-- VM -->
+  <rect x="150" y="280" width="100" height="40" fill="#4A90E2" stroke="#333" stroke-width="2" rx="5"/>
+  <text x="200" y="295" text-anchor="middle" font-size="12" fill="white">VM Backend</text>
+  <text x="200" y="310" text-anchor="middle" font-size="10" fill="white">Private IP</text>
+  
+  <defs>
+    <marker id="arrow2" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+      <polygon points="0 0, 10 5, 0 10" fill="#333"/>
+    </marker>
+  </defs>
+</svg>

@@ -1,0 +1,35 @@
+- id: fs-q1
+  type: single
+  prompt: "Vous devez partager des fichiers entre des VMs Windows et Linux dans Azure avec authentification AD. Quelle solution ?"
+  options:
+    - "Azure Files Standard avec SMB 3.0"
+    - "Azure Files Premium avec NFS 4.1"
+    - "Blob Storage avec NFSv3"
+    - "Azure NetApp Files"
+  correctIndex: 0
+  explanation: "Azure Files Standard supporte SMB 3.0 (multi-OS) avec authentification Azure AD Domain Services ou AD DS on-prem. Premium Files supporte aussi SMB mais coûte plus cher. NFS 4.1 sur Premium Files ne supporte PAS l'auth AD (identity-based). NFSv3 sur Blob non plus."
+
+- id: fs-q2
+  type: multiple
+  prompt: "Quelles sont les méthodes valides pour monter un Azure File Share ?"
+  options:
+    - "SMB 3.0 via port 445 (Windows/Linux/macOS)"
+    - "NFS 4.1 sur Premium Files (Linux seulement)"
+    - "Azure File Sync pour cache local on-premises"
+    - "HTTPS REST API pour accès programmatique"
+    - "FTP/FTPS natif sans configuration supplémentaire"
+  correctIndices: [0, 1, 2, 3]
+  explanation: "Méthodes valides : SMB 3.0 (port 445, multi-OS), NFS 4.1 (Premium, Linux only), File Sync (cache on-prem), REST API. FTP n'est PAS supporté nativement - il faut une VM avec serveur FTP comme proxy."
+
+- id: fs-q3
+  type: order
+  prompt: "Rangez les étapes pour activer l'authentification Azure AD sur un Azure File Share"
+  items:
+    - "Créer un Storage Account avec Premium ou Standard tier"
+    - "Joindre le Storage Account à Azure AD DS ou AD DS on-prem"
+    - "Créer un File Share et définir les quotas"
+    - "Assigner des rôles RBAC (Storage File Data SMB Share Contributor)"
+    - "Configurer les ACLs Windows (NTFS permissions) sur les dossiers"
+  correctOrder: [0, 1, 2, 3, 4]
+  explanation: "Ordre : Créer compte → Joindre à AD → Créer share → RBAC (accès share-level) → ACLs NTFS (accès file/folder-level). Les deux niveaux de permissions sont requis."
+

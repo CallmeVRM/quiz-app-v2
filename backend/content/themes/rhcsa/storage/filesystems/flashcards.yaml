@@ -1,0 +1,25 @@
+- id: fc1
+  concept: Entrée /etc/fstab
+  command:
+    title: Exemple XFS
+    code: UUID=xxxx  /data  xfs  defaults  0 0
+- id: fc2
+  concept: Label & UUID
+  command:
+    title: Obtenir UUID
+    code: blkid /dev/vdb1
+  examples:
+    - title: Label ext*
+      code: e2label /dev/vdb1 DATA
+- id: fc3
+  concept: xfs_growfs
+  command:
+    title: Étendre FS XFS en ligne
+    code: xfs_growfs /mountpoint
+- id: fc4
+  concept: Vérifs
+  command:
+    title: Disque & espace
+    code: |
+      lsblk -f
+      df -h

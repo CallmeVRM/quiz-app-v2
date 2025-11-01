@@ -1,0 +1,35 @@
+- id: compute-q1
+  type: single
+  prompt: "Vous devez garantir 99.99% SLA pour une application critique. Quelle configuration de disponibilité choisir ?"
+  options:
+    - "VM unique avec Premium SSD"
+    - "Availability Set (2+ VMs dans des Fault/Update Domains)"
+    - "Availability Zone (VMs dans différentes zones)"
+    - "VM Scale Set sans zones"
+  correctIndex: 2
+  explanation: "Availability Zones offrent 99.99% SLA en répartissant les VMs sur des datacenters physiquement séparés. Availability Set = 99.95% SLA (protection contre rack/maintenance). VM unique = 99.9% avec Premium SSD. Les zones protègent contre panne datacenter entier."
+
+- id: compute-q2
+  type: multiple
+  prompt: "Quelles séries de VMs Azure sont optimisées pour le calcul intensif (CPU) ?"
+  options:
+    - "Série F (Fsv2) - Ratio CPU/RAM élevé"
+    - "Série D (Dsv3) - Usage général équilibré"
+    - "Série E (Esv3) - Optimisé mémoire"
+    - "Série H (HB/HC) - HPC avec InfiniBand"
+    - "Série N (NC/ND) - GPU pour AI/ML"
+  correctIndices: [0, 3]
+  explanation: "Calcul intensif : Série F (Fsv2, jusqu'à 72 vCPUs, ratio 1:2 CPU:RAM) et Série H (HPC avec RDMA/InfiniBand, jusqu'à 120 cores). Série D = équilibré, E = mémoire, N = GPU."
+
+- id: compute-q3
+  type: order
+  prompt: "Rangez les étapes pour migrer une VM vers une nouvelle région Azure avec Azure Site Recovery"
+  items:
+    - "Créer un Recovery Services Vault dans la région cible"
+    - "Activer la réplication pour la VM source"
+    - "Configurer les paramètres réseau cible (VNet, subnet, IP)"
+    - "Effectuer un test failover (sans impact production)"
+    - "Lancer le failover définitif et valider"
+  correctOrder: [0, 1, 2, 3, 4]
+  explanation: "Ordre ASR : Vault → Activer réplication (copie initiale + delta sync) → Config réseau cible → Test failover (validation sans coupure) → Failover réel + commit. Le test est crucial avant le vrai basculement."
+

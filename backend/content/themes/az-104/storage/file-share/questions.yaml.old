@@ -1,0 +1,24 @@
+- id: q1
+  prompt: Quel service fournit un partage SMB managé ?
+  options: [ "Azure Files", "Blob Storage", "Azure NetApp Files", "Managed Disks" ]
+  correctIndex: 0
+- id: q2
+  prompt: Monter un partage sur Linux avec identité Azure AD ?
+  options: [ "SMB + Azure AD DS/Entra ID (preview)", "NFS obligatoire", "SSHFS", "AD local uniquement" ]
+  correctIndex: 0
+- id: q3
+  prompt: Performance Premium Files nécessite…
+  options: [ "Compte de stockage Premium Files", "Upgrade LRS→ZRS", "GZRS", "Blob Hot" ]
+  correctIndex: 0
+- id: q4
+  prompt: Backup natif recommandé ?
+  options: [ "Azure Backup", "Snapshots VM", "rsync", "Archive tier" ]
+  correctIndex: 0
+- id: q5
+  prompt: Sécuriser l’accès privé au réseau ?
+  options: [ "Private Endpoint", "NSG", "UDR", "App Gateway" ]
+  correctIndex: 0
+- id: q6
+  prompt: Limiter l’accès par IP publiques autorisées ?
+  options: [ "Règles de pare-feu sur le compte", "SAS uniquement", "NSG sur subnet", "Route table" ]
+  correctIndex: 0

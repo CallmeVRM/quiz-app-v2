@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320">
+  <rect width="400" height="320" fill="#f0f0f0"/>
+  <text x="200" y="30" text-anchor="middle" font-size="18" font-weight="bold">Architecture 3: NSG Basique</text>
+  
+  <!-- Internet -->
+  <ellipse cx="200" cy="75" rx="60" ry="35" fill="#87CEEB" stroke="#333" stroke-width="2"/>
+  <text x="200" y="80" text-anchor="middle" font-size="14">Internet</text>
+  
+  <!-- Arrow -->
+  <line x1="200" y1="110" x2="200" y2="155" stroke="#333" stroke-width="2" marker-end="url(#arrow3)"/>
+  
+  <!-- VNet -->
+  <rect x="80" y="160" width="240" height="140" fill="none" stroke="#666" stroke-width="2" stroke-dasharray="5,5" rx="5"/>
+  <text x="90" y="175" font-size="10" fill="#666">Virtual Network</text>
+  
+  <!-- NSG -->
+  <rect x="140" y="185" width="120" height="35" fill="#FFA500" stroke="#333" stroke-width="2" rx="5"/>
+  <text x="200" y="207" text-anchor="middle" font-size="12">NSG Rules</text>
+  
+  <!-- Arrow -->
+  <line x1="200" y1="220" x2="200" y2="245" stroke="#333" stroke-width="2" marker-end="url(#arrow3)"/>
+  
+  <!-- VM -->
+  <rect x="150" y="250" width="100" height="40" fill="#4A90E2" stroke="#333" stroke-width="2" rx="5"/>
+  <text x="200" y="265" text-anchor="middle" font-size="12" fill="white">Virtual Machine</text>
+  <text x="200" y="280" text-anchor="middle" font-size="10" fill="white">Public IP</text>
+  
+  <text x="200" y="310" text-anchor="middle" font-size="10" fill="#FF6600">⚠️ Protection limitée</text>
+  
+  <defs>
+    <marker id="arrow3" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+      <polygon points="0 0, 10 5, 0 10" fill="#333"/>
+    </marker>
+  </defs>
+</svg>

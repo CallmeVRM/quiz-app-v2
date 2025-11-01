@@ -1,0 +1,35 @@
+- id: sa-q1
+  type: multiple
+  prompt: "Quelles options de réplication offrent une protection contre une panne régionale Azure ?"
+  options:
+    - "LRS (Locally Redundant Storage)"
+    - "ZRS (Zone Redundant Storage)"
+    - "GRS (Geo-Redundant Storage)"
+    - "RA-GRS (Read-Access Geo-Redundant Storage)"
+    - "GZRS (Geo-Zone Redundant Storage)"
+  correctIndices: [2, 3, 4]
+  explanation: "Protection régionale : GRS (réplication asynchrone vers région secondaire, lecture impossible), RA-GRS (lecture possible sur secondaire), GZRS (ZRS + GRS). LRS = 3 copies dans 1 datacenter. ZRS = 3 zones dans 1 région. GRS/RA-GRS/GZRS protègent contre panne régionale."
+
+- id: sa-q2
+  type: single
+  prompt: "Vous avez besoin de latence < 1ms et IOPS > 100,000 pour une base de données. Quel type de Storage Account ?"
+  options:
+    - "Standard General Purpose v2 avec disques SSD"
+    - "Premium Block Blobs"
+    - "Premium Page Blobs (disques non managés)"
+    - "Premium File Shares"
+  correctIndex: 2
+  explanation: "Pour ultra-faible latence et IOPS élevé : Premium Page Blobs (disques non managés) ou mieux, Premium Managed Disks (qui utilisent Page Blobs en arrière-plan). Premium Block Blobs = pour workloads analytiques, pas pour DB transactionnelles. Standard = HDD/SSD standard, latence > 5ms."
+
+- id: sa-q3
+  type: order
+  prompt: "Rangez les étapes pour sécuriser un Storage Account avec accès limité à un VNet spécifique"
+  items:
+    - "Créer un Storage Account"
+    - "Configurer le firewall : 'Enabled from selected networks'"
+    - "Ajouter le VNet/Subnet autorisé"
+    - "Créer un Service Endpoint ou Private Endpoint"
+    - "Tester l'accès depuis le VNet et depuis Internet (doit échouer)"
+  correctOrder: [0, 1, 3, 2, 4]
+  explanation: "Ordre : Créer compte → Activer firewall → Créer Service/Private Endpoint → Ajouter VNet/Subnet → Tester. Le Service Endpoint doit être créé AVANT d'ajouter le VNet dans la whitelist du Storage."
+

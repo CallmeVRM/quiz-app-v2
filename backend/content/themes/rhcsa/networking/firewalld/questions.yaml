@@ -1,0 +1,24 @@
+- id: q1
+  prompt: Ouvrir le service SSH en permanence (zone par défaut) ?
+  options: [ "firewall-cmd --permanent --add-service=ssh", "iptables -A INPUT -p tcp --dport 22 -j ACCEPT", "ufw allow 22", "semanage port -a -t ssh_port_t -p tcp 22" ]
+  correctIndex: 0
+- id: q2
+  prompt: Recharger la configuration firewalld ?
+  options: [ "firewall-cmd --reload", "systemctl restart firewalld", "firewall-cmd --apply", "firewall-cmd --save" ]
+  correctIndex: 0
+- id: q3
+  prompt: Lister les services autorisés (runtime) ?
+  options: [ "firewall-cmd --list-services", "firewall-cmd --get-services", "ss -ltn", "nmcli firewalld list" ]
+  correctIndex: 0
+- id: q4
+  prompt: Ajouter un port TCP 8080 dans la zone 'public' (permanent) ?
+  options: [ "firewall-cmd --permanent --zone=public --add-port=8080/tcp", "firewall-cmd --add 8080/tcp", "iptables -A INPUT --dport 8080 -j ACCEPT", "semanage port -a -t http_port_t -p tcp 8080" ]
+  correctIndex: 0
+- id: q5
+  prompt: Associer l’interface eth0 à la zone 'public' ?
+  options: [ "nmcli con mod eth0 connection.zone public", "firewall-cmd --set-default-zone=public", "ip link set eth0 zone public", "firewall-cmd --zone=public --add-interface=eth0 --permanent" ]
+  correctIndex: 3
+- id: q6
+  prompt: Vérifier la zone active d’une interface ?
+  options: [ "firewall-cmd --get-active-zones", "firewall-cmd --list-all-zones", "nmcli dev zone", "ip a show zone" ]
+  correctIndex: 0

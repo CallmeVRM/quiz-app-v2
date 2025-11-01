@@ -1,0 +1,26 @@
+- id: fc1
+  concept: Création VM
+  command:
+    title: az vm create
+    code: |
+      az vm create \
+        -g rg-demo -n vm1 \
+        --image UbuntuLTS \
+        --ssh-key-values ~/.ssh/id_rsa.pub \
+        --public-ip-sku Standard \
+        --ports 22 80
+- id: fc2
+  concept: Disque de données
+  command:
+    title: Attacher
+    code: az vm disk attach -g rg-demo --vm-name vm1 --name dataDisk1
+- id: fc3
+  concept: Redimensionner
+  command:
+    title: Taille
+    code: az vm resize -g rg-demo -n vm1 --size Standard_B2ms
+- id: fc4
+  concept: Diagnostics
+  command:
+    title: Serial console / Boot diagnostics
+    code: Activer dans la configuration VM/Diag pour troubleshooting.

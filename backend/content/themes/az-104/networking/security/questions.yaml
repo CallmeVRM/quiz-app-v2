@@ -1,0 +1,34 @@
+- id: nsg-q1
+  type: multiple
+  prompt: "Quelles affirmations sont vraies concernant les Network Security Groups (NSG) dans Azure ?"
+  options:
+    - "Un NSG peut être associé à un subnet ou à une NIC"
+    - "Les règles NSG sont évaluées séquentiellement par priorité (100-4096)"
+    - "Par défaut, tout le trafic entrant est bloqué sauf AllowVNetInBound"
+    - "Un NSG peut contenir jusqu'à 1000 règles personnalisées"
+    - "Les règles de refus ont priorité sur les règles d'autorisation"
+  correctIndices: [0, 1, 2]
+  explanation: "Un NSG peut être associé à un subnet OU une NIC. Les règles sont évaluées par priorité (plus bas = plus prioritaire). Par défaut, le trafic entrant est bloqué sauf VNet-to-VNet. Limite: 200 règles par défaut (extensible à 500 avec demande). Les règles sont évaluées par priorité, pas par type."
+
+- id: nsg-q2
+  type: order
+  prompt: "Rangez les étapes pour bloquer le trafic SSH entrant sur un subnet Azure"
+  items:
+    - "Créer un Network Security Group"
+    - "Ajouter une règle de deny sur le port 22 (SSH)"
+    - "Associer le NSG au subnet cible"
+    - "Vérifier l'ordre de priorité des règles"
+  correctOrder: [0, 1, 3, 2]
+  explanation: "L'ordre correct : Créer NSG → Ajouter règle deny SSH → Vérifier priorités → Associer au subnet. Il faut vérifier les priorités AVANT d'associer pour éviter les conflits avec les règles par défaut."
+
+- id: nsg-q3
+  type: single
+  prompt: "Vous devez permettre le trafic HTTPS (443) depuis Internet vers une VM tout en bloquant tout autre trafic entrant. Quelle est la meilleure approche ?"
+  options:
+    - "Créer une règle NSG Allow HTTPS priorité 100, laisser les règles par défaut"
+    - "Créer une règle Allow HTTPS priorité 100, puis une règle Deny All priorité 200"
+    - "Modifier la règle DenyAllInBound existante pour autoriser le port 443"
+    - "Utiliser Azure Firewall au lieu d'un NSG"
+  correctIndex: 1
+  explanation: "Il faut explicitement créer une règle Allow HTTPS avec priorité haute, puis une règle Deny All avec priorité plus basse pour bloquer tout le reste. Les règles par défaut ont des priorités très basses (65000+) et ne suffisent pas pour une sécurité stricte."
+

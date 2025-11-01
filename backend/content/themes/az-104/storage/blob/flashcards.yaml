@@ -1,0 +1,20 @@
+- id: fc1
+  concept: Types de blobs
+  command:
+    title: Rappel
+    code: Block (fichiers), Append (logs), Page (disques)
+- id: fc2
+  concept: SAS
+  command:
+    title: Principe
+    code: Jeton signé, permissions, scope, start/expiry, IP range.
+- id: fc3
+  concept: Redondance
+  command:
+    title: Choix
+    code: LRS, ZRS, GRS, RA-GRS, GZRS (coût vs SLA vs distance)
+- id: fc4
+  concept: Lifecycle
+  command:
+    title: Automatisation
+    code: Règles de tiering chaud→cool→archive selon l’âge et l’accès.

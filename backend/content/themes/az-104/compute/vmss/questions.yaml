@@ -1,0 +1,24 @@
+- id: q1
+  prompt: Quelle ressource distribue le trafic vers les instances d’un VMSS ?
+  options: [ "Azure Load Balancer", "Traffic Manager", "Application Gateway seul", "Front Door" ]
+  correctIndex: 0
+- id: q2
+  prompt: Mode d’orchestration recommandée pour VMSS modernes ?
+  options: [ "Flexible", "Uniform", "Classic", "Manual" ]
+  correctIndex: 0
+- id: q3
+  prompt: Mettre à jour le nombre d’instances souhaité ?
+  options: [ "az vmss scale", "az vmss set-instances", "az compute scale", "az vmss capacity set" ]
+  correctIndex: 0
+- id: q4
+  prompt: Autoscale basé sur métriques ?
+  options: [ "Autoscale (Monitor)", "VMSS native only", "Azure Policy", "Diagnostics extension" ]
+  correctIndex: 0
+- id: q5
+  prompt: Image partagée recommandée pour fleet ?
+  options: [ "Shared Image Gallery", "Managed Image direct", "VDI", "Custom Script" ]
+  correctIndex: 0
+- id: q6
+  prompt: Rolling upgrade sans downtime ?
+  options: [ "Upgrade policy Rolling", "ForceRedeployAll", "Uniform only", "Manual drain" ]
+  correctIndex: 0
