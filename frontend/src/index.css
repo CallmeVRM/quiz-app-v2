@@ -1,0 +1,211 @@
+/* -------------------------
+   Base reset + vars (Metro)
+-------------------------- */
+:root {
+  --bg: #f6f7fb;
+  --bg-elev: #ffffff;
+  --text: #111418;
+  --muted: #667085;
+  --ring: #111418;
+  --border: #e5e7eb;
+  --bg-secondary: #f6f7fb;
+
+  /* Accents — default: Metro Blue */
+  --accent: #0078d4;
+  --accent-600: #106ebe;
+  --accent-50: #e6f2fb;
+
+  --tile-1: #0078d4; --tile-1-fg: #ffffff;
+  --tile-2: #00b294; --tile-2-fg: #ffffff;
+  --tile-3: #ffb900; --tile-3-fg: #111418;
+  --tile-4: #d83b01; --tile-4-fg: #ffffff;
+
+  color-scheme: light;
+}
+
+/* Themes: set on <html data-theme="metro-green|metro-purple"> */
+html[data-theme="metro-green"] {
+  --accent: #107c10;
+  --accent-600: #0e6d0e;
+  --accent-50: #e9f6e9;
+
+  --tile-1: #107c10; --tile-1-fg: #ffffff;
+  --tile-2: #038387; --tile-2-fg: #ffffff;
+  --tile-3: #73aa24; --tile-3-fg: #111418;
+  --tile-4: #498205; --tile-4-fg: #ffffff;
+}
+html[data-theme="metro-purple"] {
+  --accent: #5c2d91;
+  --accent-600: #4c2579;
+  --accent-50: #efe8f7;
+
+  --tile-1: #5c2d91; --tile-1-fg: #ffffff;
+  --tile-2: #b4009e; --tile-2-fg: #ffffff;
+  --tile-3: #744da9; --tile-3-fg: #ffffff;
+  --tile-4: #a4262c; --tile-4-fg: #ffffff;
+}
+
+/* -------------
+   Base layout
+-------------- */
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+* { box-sizing: border-box; }
+
+/* Use a clean, professional variable font with system fallbacks */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--bg-secondary);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+.container {
+  width: 100%; max-width: 1160px; margin: 0 auto; padding: 0 16px;
+}
+
+/* ----------------
+   Focus & helpers
+----------------- */
+:where(button, a, input, select, summary, [tabindex]) {
+  outline: none;
+}
+:where(button, a, input, select, summary, [tabindex]):focus-visible {
+  box-shadow: 0 0 0 3px var(--accent-50), 0 0 0 5px var(--accent);
+  border-radius: 8px;
+}
+.hidden-visually {
+  position: absolute !important; height: 1px; width: 1px;
+  overflow: hidden; clip: rect(1px,1px,1px,1px);
+}
+
+/* -----------
+   Topbar
+------------ */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--bg-elev); border-bottom: 1px solid var(--border);
+}
+.topbar-row {
+  display: flex; align-items: center; gap: 16px; height: 56px;
+}
+.brand {
+  display: inline-flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .2px;
+}
+.brand .dot {
+  width: 24px; height: 24px; border-radius: 6px; background: var(--accent);
+  display: inline-block;
+}
+.nav {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.nav a {
+  padding: 8px 12px; border-radius: 10px; color: var(--muted);
+}
+.nav a.active { color: var(--text); background: var(--accent-50); }
+.theme-switch {
+  margin-left: auto; display: inline-flex; gap: 8px;
+}
+.btn-ghost {
+  background: transparent; border: 1px solid var(--border); color: var(--text);
+  padding: 8px 12px; border-radius: 10px; cursor: pointer;
+}
+.btn-ghost:hover { background: #f3f4f6; }
+
+/* -----------
+   Buttons
+------------ */
+.btn {
+  background: var(--bg-elev); color: var(--text); border: 1px solid var(--border);
+  padding: 10px 14px; border-radius: 10px; cursor: pointer;
+}
+.btn:hover { background: #f8f9fb; }
+.btn.primary {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
+.btn.primary:hover { background: var(--accent-600); }
+
+/* -----------
+   Cards
+------------ */
+.card {
+  background: var(--bg-elev); border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px;
+}
+.card h1, .card h2, .card h3 { margin: 0 0 8px; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+/* -----------
+   Tiles (Home)
+------------ */
+.tiles {
+  display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+@media (min-width: 768px) {
+  .tiles { gap: 16px; }
+}
+.tile {
+  position: relative; border-radius: 16px; padding: 18px;
+  color: #fff; display: flex; flex-direction: column; gap: 6px; min-height: 104px;
+  transition: transform .12s ease, filter .12s ease;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.04);
+}
+.tile:hover { transform: translateY(-2px); filter: brightness(0.98); }
+.tile .title { font-size: 18px; font-weight: 800; letter-spacing: .2px; }
+.tile .desc { font-size: 13px; opacity: .9; }
+
+/* Color slots */
+.tile.c1 { background: var(--tile-1); color: var(--tile-1-fg); }
+.tile.c2 { background: var(--tile-2); color: var(--tile-2-fg); }
+.tile.c3 { background: var(--tile-3); color: var(--tile-3-fg); }
+.tile.c4 { background: var(--tile-4); color: var(--tile-4-fg); }
+
+/* -----------
+   Forms
+------------ */
+select, input[type="text"] {
+  padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: #fff;
+}
+input[type="checkbox"], input[type="radio"] { width: 16px; height: 16px; }
+label { display: inline-flex; align-items: center; gap: 8px; }
+
+details {
+  background: var(--bg-elev); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px;
+}
+details > summary { cursor: pointer; font-weight: 600; color: var(--text); }
+
+/* -----------
+   Code/Pre
+------------ */
+pre {
+  background: #0b1220; color: #e6edf3; border-radius: 12px; padding: 12px; overflow: auto;
+  border: 1px solid #0f172a;
+}
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+/* -----------
+   Tables
+------------ */
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+th { text-align: left; color: var(--muted); font-weight: 600; }
+
+/* -----------
+   Sections spacing
+------------ */
+.section { margin: 16px 0; }
+.stack-sm > * + * { margin-top: 8px; }
+.stack-md > * + * { margin-top: 12px; }
+.stack-lg > * + * { margin-top: 18px; }
+.grid-2 {
+  display: grid; gap: 12px; grid-template-columns: 1fr;
+}
+@media (min-width: 768px) { .grid-2 { grid-template-columns: 1fr 1fr; } }

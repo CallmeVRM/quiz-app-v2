@@ -1,0 +1,626 @@
+// src/pages/review/Quiz.tsx
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import useReviewSession from "../../store/sessionReview";
+import useUser from "../../store/user";
+import { shuffleSeeded } from "../../utils/shuffle";
+import {
+  fetchSubcatQuestions,
+  verifySubcatAnswers,
+  postProgress,
+  postAttempt,
+  type Question,
+  type QuestionAnswer
+} from "../../lib/quizApi";
+import ContentCard from "../../components/ContentCard";
+import { ActionBar, ActionButton } from "../../components/ActionBar";
+import QuestionRenderer from "../../components/QuestionRenderer";
+
+type QItem = {
+  theme: string;
+  category: string;
+  subcat: string;
+  q: Question;
+  shuffledOptions?: string[]; // Options mélangées (single/multiple seulement)
+  shuffleMap?: number[];       // Mapping original index → shuffled index (single/multiple)
+};
+type Answer = { questionId: string; selectedIndex?: number; selectedIndices?: number[]; selectedOrder?: number[] };
+
+export default function ReviewQuiz() {
+  const nav = useNavigate();
+  const user = useUser();
+  const { selection, reset } = useReviewSession();
+
+  const [items, setItems] = useState<QItem[]>([]);
+  const [idx, setIdx] = useState<number>(0);
+  const [answers, setAnswers] = useState<Record<string, number | number[]>>({});
+  const [checked, setChecked] = useState<Record<string, { correctAnswer: any; isCorrect: boolean }>>({});
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
+  const [finished, setFinished] = useState<boolean>(false);
+  const [score, setScore] = useState<{ total: number; correct: number } | null>(null);
+  const [reviewMode, setReviewMode] = useState<"all" | "wrong" | null>(null);
+
+  // Fonction helper pour créer une clé unique par question (évite les collisions d'IDs)
+  const getQuestionKey = (item: QItem) => `${item.theme}::${item.category}::${item.subcat}::${item.q.id}`;
+
+  useEffect(() => {
+    if (!selection.theme || selection.subcategories.length === 0) nav("/qcm");
+  }, [selection, nav]);
+
+  useEffect(() => {
+    if (!selection.theme || selection.subcategories.length === 0) return;
+    let stop = false;
+    (async () => {
+      setLoading(true); setErr(null);
+      try {
+        const res: QItem[] = [];
+        for (const tok of selection.subcategories) {
+          const [cat, sub] = tok.split("::");
+          const j = await fetchSubcatQuestions(selection.theme!, cat, sub, true, undefined, user.uuid);
+          for (const q of j.items) {
+            // Créer un mélange aléatoire des options pour cette question
+            const seed = `${user.uuid}:${selection.theme}:${cat}:${sub}:${q.id}:${Date.now()}`;
+            const indices = Array.from({ length: q.options.length }, (_, i) => i);
+            const shuffledIndices = shuffleSeeded(indices, seed);
+            const shuffledOptions = shuffledIndices.map(i => q.options[i]);
+            
+            // shuffleMap[originalIndex] = shuffledIndex
+            const shuffleMap = Array(q.options.length).fill(0);
+            shuffledIndices.forEach((originalIdx, newIdx) => {
+              shuffleMap[originalIdx] = newIdx;
+            });
+            
+            res.push({ 
+              theme: selection.theme!, 
+              category: cat, 
+              subcat: sub, 
+              q,
+              shuffledOptions,
+              shuffleMap
+            });
+          }
+        }
+        const seed = `${user.uuid}:${selection.theme}/${selection.subcategories.join(",")}`;
+        const all = shuffleSeeded(res, seed);
+        if (!stop) { setItems(all); setIdx(0); }
+      } catch (e) {
+        if (!stop) setErr(e instanceof Error ? e.message : String(e));
+      } finally {
+        if (!stop) setLoading(false);
+      }
+    })();
+    return () => { stop = true; };
+  }, [selection, user.uuid]);
+
+  const current = useMemo(() => items[idx], [items, idx]);
+  const total = items.length;
+
+  // Utiliser une clé unique pour chaque question
+  const currentKey = current ? getQuestionKey(current) : "";
+  
+  // Questions incorrectes pour statistiques
+  const wrongAnswers = useMemo(() => {
+    return items.filter(item => {
+      const key = getQuestionKey(item);
+      const c = checked[key];
+      return c && !c.isCorrect;
+    });
+  }, [items, checked]);
+
+  function setAnswer(key: string, i: number) {
+    setAnswers(prev => ({ ...prev, [key]: i }));
+    setChecked(prev => { const cp = { ...prev }; delete cp[key]; return cp; });
+  }
+
+  async function onCheck() {
+    const cur = current; if (!cur) return;
+    const key = currentKey;
+    if (!(key in answers)) return;
+
+    // L'utilisateur a sélectionné l'index dans les options mélangées
+    // On doit retrouver l'index original pour vérifier
+    const shuffledIndex = answers[key];
+    const originalIndex = cur.shuffleMap.indexOf(shuffledIndex);
+    
+    const out = await verifySubcatAnswers(cur.theme, cur.category, cur.subcat, [{ questionId: cur.q.id, selectedIndex: originalIndex }]);
+    const r = out.results.find(x => x.questionId === cur.q.id);
+    if (r) {
+      // Convertir l'index correct original en index mélangé pour l'affichage
+      const shuffledCorrectIndex = cur.shuffleMap[r.correctIndex];
+      setChecked(prev => ({ ...prev, [key]: { correctIndex: shuffledCorrectIndex, isCorrect: r.isCorrect } }));
+    }
+  }
+
+  function onRestart() {
+    setAnswers({});
+    setChecked({});
+    setFinished(false);
+    setScore(null);
+    setReviewMode(null);
+    setIdx(0);
+  }
+  
+  function onReviewWrong() {
+    setReviewMode("wrong");
+    setFinished(false);
+    // Naviguer vers la première mauvaise réponse
+    const firstWrong = items.findIndex(item => {
+      const key = getQuestionKey(item);
+      const c = checked[key];
+      return c && !c.isCorrect;
+    });
+    if (firstWrong !== -1) setIdx(firstWrong);
+  }
+
+  async function onFinish() {
+    // Vérifie et envoie la progression par sous-catégorie
+    const bySub = new Map<string, Answer[]>();
+    for (const it of items) {
+      const itemKey = getQuestionKey(it);
+      const sel = answers[itemKey];
+      if (typeof sel !== "number") continue;
+      const key = `${it.category}::${it.subcat}`;
+      if (!bySub.has(key)) bySub.set(key, []);
+      bySub.get(key)!.push({ questionId: it.q.id, selectedIndex: sel });
+    }
+
+    let correct = 0;
+    let answered = 0;
+
+    for (const [key, list] of bySub) {
+      const [cat, sub] = key.split("::");
+      
+      // Convertir les réponses mélangées en indices originaux
+      const originalAnswers = list.map(ans => {
+        const item = items.find(it => 
+          it.category === cat && 
+          it.subcat === sub && 
+          it.q.id === ans.questionId
+        );
+        if (!item) return ans;
+        
+        const shuffledIndex = ans.selectedIndex;
+        const originalIndex = item.shuffleMap.indexOf(shuffledIndex);
+        return { ...ans, selectedIndex: originalIndex };
+      });
+      
+      const out = await verifySubcatAnswers(selection.theme!, cat, sub, originalAnswers);
+      answered += out.answered;
+      correct += out.correct;
+
+      const quizScore = out.answered > 0 ? Math.round((out.correct / out.answered) * 100) : 0;
+
+      // Enregistrer cette tentative avec le score
+      await postAttempt(user.uuid, {
+        theme: selection.theme!,
+        category: cat,
+        subcategory: sub,
+        answered: out.answered,
+        correct: out.correct,
+        totalQuestions: out.totalQuestions,
+        score: quizScore
+      });
+
+      // Upsert progression pour cette sous-catégorie
+      await postProgress(user.uuid, {
+        theme: selection.theme!,
+        category: cat,
+        subcategory: sub,
+        answered: out.answered,
+        correct: out.correct,
+        totalQuestions: out.totalQuestions
+      });
+    }
+
+    setScore({ total, correct });
+    setFinished(true);
+  }
+
+  if (!selection.theme || selection.subcategories.length === 0) return null;
+  if (loading) return <div style={{ padding: "2rem", textAlign: "center" }}>Chargement…</div>;
+  if (err) return <div style={{ padding: "2rem", color: "var(--error, crimson)", textAlign: "center" }}>Erreur: {err}</div>;
+  if (total === 0) return <div style={{ padding: "2rem", textAlign: "center" }}>Aucune question dans la sélection.</div>;
+
+  const q = current.q;
+  const shuffledOptions = current.shuffledOptions;
+  const picked = answers[currentKey];
+  const corr = checked[currentKey];
+
+  // Statistiques de réponse
+  const answeredCount = Object.keys(answers).length;
+  const verifiedCount = Object.keys(checked).length;
+  
+  return (
+    <div style={{ 
+      maxWidth: 800, 
+      margin: "0 auto", 
+      padding: "1rem",
+      paddingBottom: "100px" // Space for ActionBar
+    }}>
+      {/* Progress Header */}
+      <ContentCard
+        title={
+          reviewMode === "wrong" 
+            ? `Révision des erreurs (${wrongAnswers.length} question${wrongAnswers.length > 1 ? 's' : ''})`
+            : `Question ${idx + 1} / ${total}`
+        }
+        subtitle={
+          reviewMode === "wrong"
+            ? `${current.theme} › ${current.category} › ${current.subcat}`
+            : `${current.theme} › ${current.category} › ${current.subcat} • ${answeredCount} répondue${answeredCount > 1 ? 's' : ''} • ${verifiedCount} vérifiée${verifiedCount > 1 ? 's' : ''}`
+        }
+        progress={reviewMode === "wrong" ? undefined : ((idx + 1) / total) * 100}
+        style={{ marginBottom: "1.5rem" }}
+      />
+
+      {/* Navigation rapide */}
+      {!finished && !reviewMode && (
+        <div style={{ 
+          display: "flex", 
+          flexWrap: "wrap", 
+          gap: "0.5rem", 
+          marginBottom: "1.5rem",
+          padding: "1rem",
+          background: "var(--bg-elev)",
+          borderRadius: "var(--radius, 12px)",
+          border: "1px solid var(--border)"
+        }}>
+          {items.map((item, i) => {
+            const key = getQuestionKey(item);
+            const isAnswered = key in answers;
+            const isVerified = key in checked;
+            const isCorrect = isVerified && checked[key].isCorrect;
+            const isCurrent = i === idx;
+            
+            return (
+              <button
+                key={i}
+                onClick={() => setIdx(i)}
+                style={{
+                  width: "2.5rem",
+                  height: "2.5rem",
+                  borderRadius: "var(--radius, 6px)",
+                  border: isCurrent ? "2px solid var(--accent)" : "1px solid var(--border)",
+                  background: isVerified 
+                    ? (isCorrect ? "var(--success, #22c55e)" : "var(--error, #ef4444)")
+                    : isAnswered 
+                      ? "var(--accent)" 
+                      : "transparent",
+                  color: (isVerified || isAnswered) ? "#fff" : "var(--text)",
+                  fontSize: "0.8125rem",
+                  fontWeight: isCurrent ? 700 : 500,
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}
+                title={`Question ${i + 1}${isVerified ? (isCorrect ? ' - Correcte' : ' - Incorrecte') : isAnswered ? ' - Répondue' : ''}`}
+              >
+                {i + 1}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Question Card */}
+      <ContentCard style={{ marginBottom: "1.5rem" }}>
+        <div style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "1rem", lineHeight: 1.4 }}>
+          {q.prompt}
+        </div>
+
+        {/* Options */}
+        <div style={{ display: "grid", gap: "0.75rem" }}>
+          {shuffledOptions.map((opt, i) => {
+            const isPicked = picked === i;
+            const isCorr = corr && corr.correctIndex === i;
+            const wrongPicked = corr && isPicked && !corr.isCorrect;
+            
+            const style: React.CSSProperties = {
+              border: `2px solid ${
+                isCorr ? "var(--success, #22c55e)" : 
+                wrongPicked ? "var(--error, #ef4444)" : 
+                isPicked ? "var(--accent)" : "var(--border)"
+              }`,
+              borderRadius: "var(--radius, 12px)",
+              padding: "0.875rem",
+              cursor: corr ? "default" : "pointer",
+              background: isCorr 
+                ? "color-mix(in srgb, var(--success, #22c55e) 10%, var(--bg-elev))" 
+                : wrongPicked 
+                  ? "color-mix(in srgb, var(--error, #ef4444) 10%, var(--bg-elev))"
+                  : isPicked 
+                    ? "var(--bg-elev)" 
+                    : "transparent",
+              transition: "all 0.2s ease",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem"
+            };
+
+            return (
+              <label key={i} style={style}>
+                <input
+                  type="radio"
+                  name={`q-${currentKey}`}
+                  checked={isPicked || false}
+                  onChange={() => !corr && setAnswer(currentKey, i)}
+                  disabled={!!corr}
+                  style={{ 
+                    accentColor: "var(--accent)",
+                    width: "1.125rem",
+                    height: "1.125rem",
+                    cursor: corr ? "default" : "pointer"
+                  }}
+                />
+                <span style={{ flex: 1 }}>{opt}</span>
+              </label>
+            );
+          })}
+        </div>
+
+        {/* Feedback */}
+        {corr && (
+          <div style={{ 
+            marginTop: "1rem", 
+            padding: "0.75rem", 
+            borderRadius: "var(--radius, 8px)",
+            background: corr.isCorrect 
+              ? "color-mix(in srgb, var(--success, #22c55e) 10%, var(--bg-elev))"
+              : "color-mix(in srgb, var(--error, #ef4444) 10%, var(--bg-elev))",
+            color: corr.isCorrect ? "var(--success, #22c55e)" : "var(--error, #ef4444)",
+            fontWeight: 500
+          }}>
+            {corr.isCorrect
+              ? "Bonne réponse !"
+              : `Mauvaise réponse. La bonne réponse est : ${shuffledOptions[corr.correctIndex]}`}
+          </div>
+        )}
+      </ContentCard>
+
+      {/* Score Card */}
+      {finished && score && (
+        <ContentCard style={{ 
+          textAlign: "center", 
+          background: "linear-gradient(135deg, var(--accent-50) 0%, var(--bg-elev) 100%)",
+          border: "2px solid var(--accent)",
+          padding: "2rem"
+        }}>
+          <div style={{ fontSize: "1rem", fontWeight: 600, color: "var(--accent)", marginBottom: "1rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+            Quiz Terminé !
+          </div>
+          <div style={{ fontSize: "4rem", fontWeight: 800, color: "var(--accent)", marginBottom: "0.5rem", lineHeight: 1 }}>
+            {Math.round((score.correct / score.total) * 100)}%
+          </div>
+          <div style={{ fontSize: "1.25rem", color: "var(--text)", marginBottom: "1rem" }}>
+            <span style={{ fontWeight: 700, color: score.correct === score.total ? "#10b981" : "var(--text)" }}>
+              {score.correct}
+            </span>
+            {" / "}
+            <span style={{ color: "var(--muted)" }}>{score.total}</span>
+            {" "}réponses correctes
+          </div>
+          <div style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            padding: "0.625rem 1.25rem",
+            background: score.correct / score.total >= 0.8 ? "#10b981" : score.correct / score.total >= 0.5 ? "#f59e0b" : "#ef4444",
+            color: "#fff",
+            borderRadius: "50px",
+            fontSize: "0.875rem",
+            fontWeight: 600,
+            marginBottom: "1rem"
+          }}>
+            {score.correct / score.total >= 0.8 ? "Excellent" : score.correct / score.total >= 0.5 ? "Bien" : "Continue !"}
+          </div>
+          
+          {/* Actions après quiz */}
+          <div style={{ 
+            display: "flex", 
+            gap: "0.75rem", 
+            justifyContent: "center", 
+            flexWrap: "wrap",
+            marginTop: "1.5rem" 
+          }}>
+            <button
+              onClick={onRestart}
+              style={{
+                padding: "0.75rem 1.5rem",
+                background: "var(--accent)",
+                color: "#fff",
+                border: "none",
+                borderRadius: "var(--radius, 8px)",
+                fontSize: "0.875rem",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem"
+              }}
+            >
+              Refaire le quiz
+            </button>
+            
+            {wrongAnswers.length > 0 && (
+              <button
+                onClick={onReviewWrong}
+                style={{
+                  padding: "0.75rem 1.5rem",
+                  background: "var(--error, #ef4444)",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "var(--radius, 8px)",
+                  fontSize: "0.875rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem"
+                }}
+              >
+                Revoir les erreurs ({wrongAnswers.length})
+              </button>
+            )}
+            
+            <button
+              onClick={() => nav("/progress")}
+              style={{
+                padding: "0.75rem 1.5rem",
+                background: "var(--bg-elev)",
+                color: "var(--text)",
+                border: "2px solid var(--border)",
+                borderRadius: "var(--radius, 8px)",
+                fontSize: "0.875rem",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem"
+              }}
+            >
+              Voir la progression
+            </button>
+            
+            <button
+              onClick={() => nav("/qcm")}
+              style={{
+                padding: "0.75rem 1.5rem",
+                background: "var(--bg-elev)",
+                color: "var(--text)",
+                border: "2px solid var(--border)",
+                borderRadius: "var(--radius, 8px)",
+                fontSize: "0.875rem",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem"
+              }}
+            >
+              Nouveau quiz
+            </button>
+          </div>
+          
+          <div style={{ marginTop: "1.5rem", fontSize: "0.8125rem", color: "var(--muted)" }}>
+            Cette tentative a été enregistrée dans votre progression
+          </div>
+        </ContentCard>
+      )}
+
+      {/* Action Bar */}
+      {!finished && (
+        <ActionBar>
+          <ActionButton
+            variant="ghost"
+            onClick={() => { reset(); nav("/"); }}
+          >
+            Accueil
+          </ActionButton>
+          <ActionButton
+            variant="secondary"
+            onClick={() => setIdx(i => Math.max(0, i - 1))}
+            disabled={idx === 0}
+          >
+            Précédente
+          </ActionButton>
+          <ActionButton
+            variant="primary"
+            onClick={onCheck}
+            disabled={typeof picked !== "number" || !!corr}
+          >
+            Vérifier
+          </ActionButton>
+          <ActionButton
+            variant="secondary"
+            onClick={() => setIdx(i => Math.min(total - 1, i + 1))}
+            disabled={idx === total - 1}
+          >
+            Suivante
+          </ActionButton>
+          <ActionButton
+            variant="primary"
+            onClick={onFinish}
+            disabled={Object.keys(answers).length === 0}
+          >
+            Terminer
+          </ActionButton>
+        </ActionBar>
+      )}
+      
+      {/* Action Bar en mode révision des erreurs */}
+      {reviewMode === "wrong" && (
+        <ActionBar>
+          <ActionButton
+            variant="ghost"
+            onClick={() => { setReviewMode(null); setIdx(0); }}
+          >
+            Retour aux résultats
+          </ActionButton>
+          <ActionButton
+            variant="secondary"
+            onClick={() => {
+              const wrongIndices = items
+                .map((item, i) => ({ item, i }))
+                .filter(({ item }) => {
+                  const key = getQuestionKey(item);
+                  const c = checked[key];
+                  return c && !c.isCorrect;
+                })
+                .map(x => x.i);
+              const currentPos = wrongIndices.indexOf(idx);
+              if (currentPos > 0) setIdx(wrongIndices[currentPos - 1]);
+            }}
+            disabled={(() => {
+              const wrongIndices = items
+                .map((item, i) => ({ item, i }))
+                .filter(({ item }) => {
+                  const key = getQuestionKey(item);
+                  const c = checked[key];
+                  return c && !c.isCorrect;
+                })
+                .map(x => x.i);
+              return wrongIndices.indexOf(idx) === 0;
+            })()}
+          >
+            Erreur précédente
+          </ActionButton>
+          <ActionButton
+            variant="secondary"
+            onClick={() => {
+              const wrongIndices = items
+                .map((item, i) => ({ item, i }))
+                .filter(({ item }) => {
+                  const key = getQuestionKey(item);
+                  const c = checked[key];
+                  return c && !c.isCorrect;
+                })
+                .map(x => x.i);
+              const currentPos = wrongIndices.indexOf(idx);
+              if (currentPos < wrongIndices.length - 1) setIdx(wrongIndices[currentPos + 1]);
+            }}
+            disabled={(() => {
+              const wrongIndices = items
+                .map((item, i) => ({ item, i }))
+                .filter(({ item }) => {
+                  const key = getQuestionKey(item);
+                  const c = checked[key];
+                  return c && !c.isCorrect;
+                })
+                .map(x => x.i);
+              return wrongIndices.indexOf(idx) === wrongIndices.length - 1;
+            })()}
+          >
+            Erreur suivante
+          </ActionButton>
+        </ActionBar>
+      )}
+    </div>
+  );
+}
