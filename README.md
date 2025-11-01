@@ -21,11 +21,17 @@ Une plateforme interactive pour la préparation aux certifications IT avec suppo
 
 git clone https://
 
+```bash
+mkdir -p ~/quiz-app-v2/content
+```
+
+### Aller au répertoire de travail :
 cd quiz-app-v2
 
 
 ### Configurer les variables d'environnement
 ```bash
+cp env.example .env
 cp frontend/frontend.env.example frontend/.env
 cp backend/backend.env.example backend/.env
 ```
@@ -33,8 +39,11 @@ cp backend/backend.env.example backend/.env
 ### Avec Docker Compose
 
 ```bash
-# 2. Démarrer les services
-docker compose up -d
+#Build les images
+docker compose up --build -d
+docker compose run --rm init-themes
+docker compose restart quiz-backend
+
 
 # 3. Accéder à l'application
 # Frontend: http://localhost (via Traefik) ou http://localhost:5173
